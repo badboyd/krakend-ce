@@ -4,7 +4,7 @@ import (
 	cel "github.com/devopsfaith/krakend-cel"
 	jsonschema "github.com/devopsfaith/krakend-jsonschema"
 	lua "github.com/devopsfaith/krakend-lua/proxy"
-	metrics "github.com/devopsfaith/krakend-metrics/gin"
+	metrics "github.com/devopsfaith/krakend-metrics/mux"
 	opencensus "github.com/devopsfaith/krakend-opencensus"
 	"github.com/luraproject/lura/logging"
 	"github.com/luraproject/lura/proxy"

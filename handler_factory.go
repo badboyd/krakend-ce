@@ -1,25 +1,29 @@
 package krakend
 
 import (
-	botdetector "github.com/devopsfaith/krakend-botdetector/gin"
-	jose "github.com/devopsfaith/krakend-jose"
-	ginjose "github.com/devopsfaith/krakend-jose/gin"
-	lua "github.com/devopsfaith/krakend-lua/router/gin"
-	metrics "github.com/devopsfaith/krakend-metrics/gin"
-	opencensus "github.com/devopsfaith/krakend-opencensus/router/gin"
-	juju "github.com/devopsfaith/krakend-ratelimit/juju/router/gin"
+	"net/http"
+
+	juju "github.com/badboyd/krakend-ratelimit/juju/router/mux"
+	jose "github.com/devopsfaith/krakend-jose/mux"
+	lua "github.com/devopsfaith/krakend-lua/router/mux"
+	metrics "github.com/devopsfaith/krakend-metrics/mux"
+	opencensus "github.com/devopsfaith/krakend-opencensus/router/mux"
+
 	"github.com/luraproject/lura/logging"
-	router "github.com/luraproject/lura/router/gin"
+	router "github.com/luraproject/lura/router/mux"
 )
+
+func paramExtractor(r *http.Request) map[string]string {
+	return nil
+}
 
 // NewHandlerFactory returns a HandlerFactory with a rate-limit and a metrics collector middleware injected
 func NewHandlerFactory(logger logging.Logger, metricCollector *metrics.Metrics, rejecter jose.RejecterFactory) router.HandlerFactory {
 	handlerFactory := juju.HandlerFactory
-	handlerFactory = lua.HandlerFactory(logger, handlerFactory)
-	handlerFactory = ginjose.HandlerFactory(handlerFactory, logger, rejecter)
+	handlerFactory = lua.HandlerFactory(logger, handlerFactory, paramExtractor)
+	handlerFactory = jose.HandlerFactory(handlerFactory, logger, rejecter)
 	handlerFactory = metricCollector.NewHTTPHandlerFactory(handlerFactory)
 	handlerFactory = opencensus.New(handlerFactory)
-	handlerFactory = botdetector.New(handlerFactory, logger)
 	return handlerFactory
 }
 

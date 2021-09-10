@@ -10,7 +10,7 @@ import (
 	lambda "github.com/devopsfaith/krakend-lambda"
 	lua "github.com/devopsfaith/krakend-lua/proxy"
 	martian "github.com/devopsfaith/krakend-martian"
-	metrics "github.com/devopsfaith/krakend-metrics/gin"
+	metrics "github.com/devopsfaith/krakend-metrics/mux"
 	oauth2client "github.com/devopsfaith/krakend-oauth2-clientcredentials"
 	opencensus "github.com/devopsfaith/krakend-opencensus"
 	pubsub "github.com/devopsfaith/krakend-pubsub"

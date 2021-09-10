@@ -12,7 +12,7 @@ import (
 )
 
 // NewEngine creates a new gin engine with some default values and a secure middleware
-func NewEngine(cfg config.ServiceConfig, logger logging.Logger, w io.Writer) *gin.Engine {
+func NewGinEngine(cfg config.ServiceConfig, logger logging.Logger, w io.Writer) *gin.Engine {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -35,8 +35,8 @@ func NewEngine(cfg config.ServiceConfig, logger logging.Logger, w io.Writer) *gi
 	return engine
 }
 
-type engineFactory struct{}
+type ginEngineFactory struct{}
 
-func (e engineFactory) NewEngine(cfg config.ServiceConfig, l logging.Logger, w io.Writer) *gin.Engine {
-	return NewEngine(cfg, l, w)
+func (e ginEngineFactory) NewEngine(cfg config.ServiceConfig, l logging.Logger, w io.Writer) *gin.Engine {
+	return NewGinEngine(cfg, l, w)
 }
