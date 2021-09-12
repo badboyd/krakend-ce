@@ -9,10 +9,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	krakend "github.com/devopsfaith/krakend-ce"
-	"github.com/devopsfaith/krakend-cobra"
+	krakend "github.com/badboyd/krakend-ce"
+	cmd "github.com/devopsfaith/krakend-cobra"
 	flexibleconfig "github.com/devopsfaith/krakend-flexibleconfig"
-	"github.com/devopsfaith/krakend-viper"
+	viper "github.com/devopsfaith/krakend-viper"
 	"github.com/luraproject/lura/config"
 )
 
@@ -39,6 +39,7 @@ func main() {
 		}
 	}()
 
+	config.RoutingPattern = config.BracketsRouterPatternBuilder
 	krakend.RegisterEncoders()
 
 	var cfg config.Parser

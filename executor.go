@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -29,7 +30,6 @@ import (
 	pubsub "github.com/devopsfaith/krakend-pubsub"
 	"github.com/devopsfaith/krakend-usage/client"
 	"github.com/go-contrib/uuid"
-	"github.com/gorilla/mux"
 	"github.com/luraproject/lura/config"
 	"github.com/luraproject/lura/core"
 	"github.com/luraproject/lura/logging"
@@ -73,7 +73,7 @@ type MetricsAndTracesRegister interface {
 
 // EngineFactory returns a gin engine, ready to be passed to the KrakenD RouterFactory
 type EngineFactory interface {
-	NewEngine(config.ServiceConfig, logging.Logger, io.Writer) *mux.Router
+	NewEngine(config.ServiceConfig, logging.Logger, io.Writer) *gMux
 }
 
 // ProxyFactory returns a KrakenD proxy factory, ready to be passed to the KrakenD RouterFactory
@@ -162,6 +162,7 @@ func (e *ExecutorBuilder) NewCmdExecutor(ctx context.Context) cmd.Executor {
 				metricCollector,
 			),
 			Middlewares:    e.Middlewares,
+			DebugPattern:   "/__debug/{params}",
 			Logger:         logger,
 			HandlerFactory: e.HandlerFactory.NewHandlerFactory(logger, metricCollector, tokenRejecterFactory),
 			RunServer:      router.RunServerFunc(e.RunServerFactory.NewRunServer(logger, krakendrouter.RunServer)),
@@ -241,6 +242,7 @@ type LoggerBuilder struct{}
 func (LoggerBuilder) NewLogger(cfg config.ServiceConfig) (logging.Logger, io.Writer, error) {
 	var writers []io.Writer
 	gelfWriter, gelfErr := gelf.NewWriter(cfg.ExtraConfig)
+	log.Println(gelfErr)
 	if gelfErr == nil {
 		writers = append(writers, gelfWriterWrapper{gelfWriter})
 		gologging.SetFormatterSelector(func(w io.Writer) string {
