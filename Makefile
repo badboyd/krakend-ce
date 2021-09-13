@@ -89,6 +89,9 @@ build:
 test: build
 	go test -v ./tests
 
+run_in_docker:
+	docker run --rm -it -p 10100:8080 -v "${PWD}:/go/src/github.com/devopsfaith/krakend-ce" -w /go golang:${GOLANG_VERSION} bash
+
 build_on_docker:
 	docker run --rm -it -v "${PWD}:/app" -w /app golang:${GOLANG_VERSION} make build
 

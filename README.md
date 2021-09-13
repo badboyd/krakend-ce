@@ -89,3 +89,21 @@ The package creates a krakend user to run the service and configures the service
 * Debian
 * CentOS/RedHat
 
+
+## Wildcard catch-all
+* You can use catch-all `gin` routing by `/supu/*path`
+* Due to `gin` default the `path` will include `/`, that's why we use url_pattern as `/supu{path}`
+
+
+Example
+``` json
+    {
+        "endpoint": "/trade/public/*path",
+        "backend": [
+            {
+                "url_pattern": "/public{path}",
+                "host": ["http://host.docker.internal:8080"]
+            }
+        ]
+    }
+```

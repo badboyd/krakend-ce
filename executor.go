@@ -2,15 +2,18 @@ package krakend
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
+	cmd "github.com/badboyd/krakend-cobra"
+	badboydconfig "github.com/badboyd/lura/config"
 	krakendbf "github.com/devopsfaith/bloomfilter/krakend"
 	cel "github.com/devopsfaith/krakend-cel"
-	cmd "github.com/devopsfaith/krakend-cobra"
 	cors "github.com/devopsfaith/krakend-cors/gin"
 	gelf "github.com/devopsfaith/krakend-gelf"
 	gologging "github.com/devopsfaith/krakend-gologging"
@@ -33,6 +36,7 @@ import (
 	"github.com/go-contrib/uuid"
 	"github.com/luraproject/lura/config"
 	"github.com/luraproject/lura/core"
+	"github.com/luraproject/lura/encoding"
 	"github.com/luraproject/lura/logging"
 	"github.com/luraproject/lura/proxy"
 	krakendrouter "github.com/luraproject/lura/router"
@@ -128,7 +132,9 @@ type ExecutorBuilder struct {
 func (e *ExecutorBuilder) NewCmdExecutor(ctx context.Context) cmd.Executor {
 	e.checkCollaborators()
 
-	return func(cfg config.ServiceConfig) {
+	return func(bcfg badboydconfig.ServiceConfig) {
+		cfg := cloneConfig(bcfg)
+
 		logger, gelfWriter, gelfErr := e.LoggerFactory.NewLogger(cfg)
 		if gelfErr != nil {
 			return
@@ -329,4 +335,97 @@ func startReporter(ctx context.Context, logger logging.Logger, cfg config.Servic
 
 type gelfWriterWrapper struct {
 	io.Writer
+}
+
+func cloneConfig(cfg badboydconfig.ServiceConfig) config.ServiceConfig {
+	// c := config.ServiceConfig{
+	// 	Name:                  cfg.Name,
+	// 	Timeout:               cfg.Timeout,
+	// 	CacheTTL:              cfg.CacheTTL,
+	// 	Host:                  cfg.Host,
+	// 	Port:                  cfg.Port,
+	// 	Version:               cfg.Version,
+	// 	OutputEncoding:        cfg.OutputEncoding,
+	// 	ExtraConfig:           config.ExtraConfig(cfg.ExtraConfig),
+	// 	ReadTimeout:           cfg.ReadTimeout,
+	// 	WriteTimeout:          cfg.WriteTimeout,
+	// 	IdleTimeout:           cfg.IdleConnTimeout,
+	// 	ReadHeaderTimeout:     cfg.ReadHeaderTimeout,
+	// 	DisableKeepAlives:     cfg.DisableKeepAlives,
+	// 	DisableCompression:    cfg.DisableCompression,
+	// 	MaxIdleConns:          cfg.MaxIdleConns,
+	// 	MaxIdleConnsPerHost:   cfg.MaxIdleConnsPerHost,
+	// 	IdleConnTimeout:       cfg.IdleTimeout,
+	// 	ResponseHeaderTimeout: cfg.ReadHeaderTimeout,
+	// 	ExpectContinueTimeout: cfg.ExpectContinueTimeout,
+	// 	DialerTimeout:         cfg.DialerTimeout,
+	// 	DialerFallbackDelay:   cfg.DialerFallbackDelay,
+	// 	DialerKeepAlive:       cfg.DialerKeepAlive,
+	// 	DisableStrictREST:     cfg.DisableStrictREST,
+	// 	Plugin:                (*config.Plugin)(cfg.Plugin),
+	// 	TLS:                   (*config.TLS)(cfg.TLS),
+	// 	Debug:                 cfg.Debug,
+	// }
+
+	// endpoints := make([]*config.EndpointConfig, len(cfg.Endpoints))
+	// for _, originEndpoint := range cfg.Endpoints {
+	// 	e := &config.EndpointConfig{
+	// 		Endpoint:        originEndpoint.Endpoint,
+	// 		Method:          originEndpoint.Method,
+	// 		Backend:         make([]*config.Backend, len(originEndpoint.Backend)),
+	// 		ConcurrentCalls: originEndpoint.ConcurrentCalls,
+	// 		Timeout:         originEndpoint.Timeout,
+	// 		CacheTTL:        originEndpoint.CacheTTL,
+	// 		QueryString:     originEndpoint.QueryString,
+	// 		ExtraConfig:     config.ExtraConfig(originEndpoint.ExtraConfig),
+	// 		HeadersToPass:   originEndpoint.HeadersToPass,
+	// 		OutputEncoding:  originEndpoint.OutputEncoding,
+	// 	}
+	// 	for _, b := range originEndpoint.Backend {
+	// 		e.Backend = append(e.Backend, &config.Backend{
+	// 			Group:                    b.Group,
+	// 			Method:                   b.Method,
+	// 			Host:                     b.Host,
+	// 			HostSanitizationDisabled: b.HostSanitizationDisabled,
+	// 			URLPattern:               b.URLPattern,
+	// 			Blacklist:                b.Blacklist,
+	// 			Whitelist:                b.Whitelist,
+	// 			AllowList:                b.AllowList,
+	// 			DenyList:                 b.DenyList,
+	// 			Mapping:                  b.Mapping,
+	// 			Encoding:                 b.Encoding,
+	// 			IsCollection:             b.IsCollection,
+	// 			Target:                   b.Target,
+	// 			SD:                       b.SD,
+	// 			URLKeys:                  b.URLKeys,
+	// 			ConcurrentCalls:          b.ConcurrentCalls,
+	// 			Timeout:                  b.Timeout,
+	// 			Decoder:                  encoding.Get(strings.ToLower(b.Encoding))(b.IsCollection),
+	// 			ExtraConfig:              config.ExtraConfig(b.ExtraConfig),
+	// 		})
+	// 	}
+
+	// 	endpoints = append(endpoints, e)
+	// }
+	// c.Endpoints = endpoints
+
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		panic(fmt.Errorf("cannot marshal orgin config, %s", err.Error()))
+	}
+
+	c := config.ServiceConfig{}
+	if err := json.Unmarshal(b, &c); err != nil {
+		panic(fmt.Errorf("cannot marshal new config, %s", err.Error()))
+	}
+	for i, e := range c.Endpoints {
+		for j, b := range e.Backend {
+			c.Endpoints[i].Backend[j].Decoder = encoding.Get(strings.ToLower(b.Encoding))(b.IsCollection)
+		}
+	}
+
+	// log.Printf("%+v\n", cfg)
+	// log.Printf("%+v\n", c)
+
+	return c
 }

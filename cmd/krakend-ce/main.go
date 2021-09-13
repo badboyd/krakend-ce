@@ -9,11 +9,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	krakend "github.com/devopsfaith/krakend-ce"
-	"github.com/devopsfaith/krakend-cobra"
-	flexibleconfig "github.com/devopsfaith/krakend-flexibleconfig"
-	"github.com/devopsfaith/krakend-viper"
-	"github.com/luraproject/lura/config"
+	krakend "github.com/badboyd/krakend-ce"
+	cmd "github.com/badboyd/krakend-cobra"
+	flexibleconfig "github.com/badboyd/krakend-flexibleconfig"
+	viper "github.com/badboyd/krakend-viper"
+	"github.com/badboyd/lura/config"
 )
 
 const (
@@ -43,6 +43,7 @@ func main() {
 
 	var cfg config.Parser
 	cfg = viper.New()
+
 	if os.Getenv(fcEnable) != "" {
 		cfg = flexibleconfig.NewTemplateParser(flexibleconfig.Config{
 			Parser:    cfg,
