@@ -214,6 +214,15 @@
                     "strategy": "ip"
                 }
             }
+        },
+        {
+            "endpoint": "/trade/public/*path",
+            "backend": [
+                {
+                    "url_pattern": "/public/{path}",
+                    "host": ["http://host.docker.internal:8080"]
+                }
+            ]
         }
     ]
 }
