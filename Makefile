@@ -6,7 +6,7 @@
 
 BIN_NAME :=krakend
 OS := $(shell uname | tr '[:upper:]' '[:lower:]')
-VERSION := 1.4.1
+VERSION := 1.4.2
 PKGNAME := krakend
 LICENSE := Apache 2.0
 VENDOR=
@@ -96,7 +96,7 @@ build_on_docker:
 	docker run --rm -it -v "${PWD}:/app" -w /app golang:${GOLANG_VERSION} make build
 
 docker:
-	docker build --pull -t devopsfaith/krakend:${VERSION} .
+	docker build --pull -t badboyd/krakend:${VERSION} .
 
 builder/skel/%/etc/init.d/krakend: builder/files/krakend.init
 	mkdir -p "$(dir $@)"
