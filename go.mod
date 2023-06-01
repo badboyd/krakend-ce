@@ -33,7 +33,7 @@ require (
 	github.com/devopsfaith/krakend-rss v1.4.0
 	github.com/devopsfaith/krakend-usage v1.4.0
 	github.com/devopsfaith/krakend-xml v1.4.0
-	github.com/gin-gonic/gin v1.7.4
+	github.com/gin-gonic/gin v1.9.1
 	github.com/go-contrib/uuid v1.2.0
 	github.com/go-test/deep v1.0.7 // indirect
 	github.com/hashicorp/vault/api v1.0.5-0.20201001211907-38d91b749c77 // indirect
